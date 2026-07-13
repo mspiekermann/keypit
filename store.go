@@ -18,6 +18,11 @@ func (s *Store) GetAll() map[string]any {
 	return s.data
 }
 
+func (s *Store) Get(key string) (any, bool) {
+	value, exists := s.data[key]
+	return value, exists
+}
+
 func (s *Store) CountItems() int {
 	return len(s.data)
 }
