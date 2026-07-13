@@ -1,0 +1,11 @@
+### Add key-value pair
+PUT http://localhost:9000/add
+Content-Type: application/json
+
+{
+  "key": "name",
+  "value": "Bob"
+}
+
+###
+GET http://localhost:9000/all
