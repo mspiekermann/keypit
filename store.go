@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"maps"
+	"sync"
+)
 
 type Store struct {
 	mu   sync.RWMutex
@@ -24,9 +27,7 @@ func (s *Store) GetAll() map[string]any {
 	defer s.mu.RUnlock()
 
 	result := make(map[string]any, len(s.data))
-	for key, value := range s.data {
-		result[key] = value
-	}
+	maps.Copy(result, s.data)
 
 	return result
 }
