@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
+	"time"
 )
 
 type setValueRequest struct {
@@ -65,5 +68,24 @@ func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		app.logger.Printf("encoding response: %v", err)
+	}
+}
+
+func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
+	filename := fmt.Sprintf("%s_snapshot.json", time.Now().Format("20060102"))
+	file, err := os.Create(filename)
+
+	if err != nil {
+		http.Error(w, "failed to create snapshot", http.StatusInternalServerError)
+	}
+
+	defer func() {
+		if closeErr := file.Close(); err == nil && closeErr != nil {
+			http.Error(w, "failed to finish snapshot", http.StatusInternalServerError)
+		}
+	}()
+
+	if err := json.NewEncoder(file).Encode(app.store.data); err != nil {
+		http.Error(w, "failed to write snapshot", http.StatusInternalServerError)
 	}
 }

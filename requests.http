@@ -37,3 +37,6 @@ GET http://localhost:9000/stats
 
 ###
 DELETE http://localhost:9000/items/object
+
+###
+POST http://localhost:9000/snapshot

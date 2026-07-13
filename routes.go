@@ -17,6 +17,7 @@ func (app *App) routes() http.Handler {
 	mux.HandleFunc("GET /items/{key}", app.handleGetByKey)
 	mux.HandleFunc("DELETE /items/{key}", app.handleDeleteKeyValuePair)
 	mux.HandleFunc("GET /stats", app.handleStats)
+	mux.HandleFunc("POST /snapshot", app.handleSnapshotToFile)
 
 	return mux
 }
