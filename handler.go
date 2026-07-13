@@ -2,39 +2,30 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 )
+
+type setValueRequest struct {
+	Value any `json:"value"`
+}
 
 func (app *App) handleSetKeyValuePair(w http.ResponseWriter, r *http.Request) {
 	key := r.PathValue("key")
 
-	type SetValueRequest struct {
-		Value any `json:"value"`
-	}
+	var request setValueRequest
 
-	var data SetValueRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		log.Printf("decoding request body: %v", err)
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		app.logger.Printf("decoding request body: %v", err)
 		http.Error(w, "invalid JSON request body", http.StatusBadRequest)
 		return
 	}
 
-	app.store.Add(key, data.Value)
-
+	app.store.Add(key, request.Value)
 	w.WriteHeader(http.StatusCreated)
 }
 
 func (app *App) handleGetAll(w http.ResponseWriter, r *http.Request) {
-
-	data := app.store.GetAll()
-
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("encoding response: %v", err)
-	}
+	app.writeJSON(w, http.StatusOK, app.store.GetAll())
 }
 
 func (app *App) handleGetByKey(w http.ResponseWriter, r *http.Request) {
@@ -46,24 +37,15 @@ func (app *App) handleGetByKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(value); err != nil {
-		log.Printf("encoding response: %v", err)
-	}
+	app.writeJSON(w, http.StatusOK, value)
 }
 
 func (app *App) handleStats(w http.ResponseWriter, r *http.Request) {
-
-	data := map[string]int{
+	response := map[string]int{
 		"count": app.store.CountItems(),
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("encoding response: %v", err)
-	}
+	app.writeJSON(w, http.StatusOK, response)
 }
 
 func (app *App) handleDeleteKeyValuePair(w http.ResponseWriter, r *http.Request) {
@@ -75,4 +57,13 @@ func (app *App) handleDeleteKeyValuePair(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		app.logger.Printf("encoding response: %v", err)
+	}
 }
