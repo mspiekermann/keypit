@@ -26,3 +26,12 @@ func (s *Store) Get(key string) (any, bool) {
 func (s *Store) CountItems() int {
 	return len(s.data)
 }
+
+func (s *Store) Delete(key string) bool {
+	if _, exists := s.data[key]; !exists {
+		return false
+	}
+
+	delete(s.data, key)
+	return true
+}

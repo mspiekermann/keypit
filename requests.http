@@ -1,27 +1,24 @@
 ### Add key-value pair
-PUT http://localhost:9000/add
+PUT http://localhost:9000/items/name
 Content-Type: application/json
 
 {
-  "key": "name",
   "value": "Bob"
 }
 
 ###
-PUT http://localhost:9000/add
+PUT http://localhost:9000/items/url
 Content-Type: application/json
 
 {
-  "key": "url",
   "value": "http://www.example.com"
 }
 
 ###
-PUT http://localhost:9000/add
+PUT http://localhost:9000/items/object
 Content-Type: application/json
 
 {
-  "key": "object",
   "value": {
     "a": "test",
     "b": "test2",
@@ -30,7 +27,13 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:9000/all
+GET http://localhost:9000/items
 
 ###
-GET http://localhost:9000/count
+GET http://localhost:9000/items/url
+
+###
+GET http://localhost:9000/stats
+
+###
+DELETE http://localhost:9000/items/object

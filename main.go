@@ -27,7 +27,6 @@ func main() {
 	}
 
 	server.ListenAndServe()
-
 }
 
 func (app *App) routes() http.Handler {
@@ -38,22 +37,23 @@ func (app *App) routes() http.Handler {
 		fmt.Fprintln(w, "Hello from Keyp it!")
 	})
 
-	mux.HandleFunc("PUT /add", app.handleAddKeyValuePair)
-	mux.HandleFunc("GET /all", app.handleGetAll)
-	mux.HandleFunc("GET /get/{key}", app.handleGetByKey)
-	mux.HandleFunc("GET /count", app.handleCountItems)
+	mux.HandleFunc("PUT /items/{key}", app.handleSetKeyValuePair)
+	mux.HandleFunc("GET /items", app.handleGetAll)
+	mux.HandleFunc("GET /items/{key}", app.handleGetByKey)
+	mux.HandleFunc("DELETE /items/{key}", app.handleDeleteKeyValuePair)
+	mux.HandleFunc("GET /stats", app.handleStats)
 
 	return mux
 }
 
-func (app *App) handleAddKeyValuePair(w http.ResponseWriter, r *http.Request) {
+func (app *App) handleSetKeyValuePair(w http.ResponseWriter, r *http.Request) {
+	key := r.PathValue("key")
 
-	type AddKeyValuePairRequest struct {
-		Key   string `json:"key"`
-		Value any    `json:"value"`
+	type SetValueRequest struct {
+		Value any `json:"value"`
 	}
 
-	var data AddKeyValuePairRequest
+	var data SetValueRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		log.Printf("decoding request body: %v", err)
@@ -61,7 +61,7 @@ func (app *App) handleAddKeyValuePair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.store.Add(data.Key, data.Value)
+	app.store.Add(key, data.Value)
 
 	w.WriteHeader(http.StatusCreated)
 }
@@ -93,7 +93,7 @@ func (app *App) handleGetByKey(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *App) handleCountItems(w http.ResponseWriter, r *http.Request) {
+func (app *App) handleStats(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]int{
 		"count": app.store.CountItems(),
@@ -104,4 +104,15 @@ func (app *App) handleCountItems(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		log.Printf("encoding response: %v", err)
 	}
+}
+
+func (app *App) handleDeleteKeyValuePair(w http.ResponseWriter, r *http.Request) {
+	key := r.PathValue("key")
+
+	if !app.store.Delete(key) {
+		http.Error(w, "key not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
