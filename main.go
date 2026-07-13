@@ -40,6 +40,7 @@ func (app *App) routes() http.Handler {
 
 	mux.HandleFunc("PUT /add", app.handleAddKeyValuePair)
 	mux.HandleFunc("GET /all", app.handleGetAll)
+	mux.HandleFunc("GET /count", app.handleCountItems)
 
 	return mux
 }
@@ -67,6 +68,19 @@ func (app *App) handleAddKeyValuePair(w http.ResponseWriter, r *http.Request) {
 func (app *App) handleGetAll(w http.ResponseWriter, r *http.Request) {
 
 	data := app.store.GetAll()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("encoding response: %v", err)
+	}
+}
+
+func (app *App) handleCountItems(w http.ResponseWriter, r *http.Request) {
+
+	data := map[string]int{
+		"count": app.store.CountItems(),
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 

@@ -17,3 +17,7 @@ func (s *Store) Add(key string, value any) {
 func (s *Store) GetAll() map[string]any {
 	return s.data
 }
+
+func (s *Store) CountItems() int {
+	return len(s.data)
+}

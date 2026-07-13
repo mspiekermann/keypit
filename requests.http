@@ -8,4 +8,29 @@ Content-Type: application/json
 }
 
 ###
+PUT http://localhost:9000/add
+Content-Type: application/json
+
+{
+  "key": "url",
+  "value": "http://www.example.com"
+}
+
+###
+PUT http://localhost:9000/add
+Content-Type: application/json
+
+{
+  "key": "object",
+  "value": {
+    "a": "test",
+    "b": "test2",
+    "c": 3
+  }
+}
+
+###
 GET http://localhost:9000/all
+
+###
+GET http://localhost:9000/count
