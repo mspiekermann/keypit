@@ -1,3 +1,9 @@
+<span id="logo" align="center"> 
+    <img src="assets/keypit_logo.png" alt="drawing" width="250"/>
+</span>
+
+
+
 # Keyp it!
 
 Keyp it! is just a small remote key-value store that is implemented as an exercise during my courses at [Boot.dev](https://boot.dev). It is not only a reference to already learned content, but also a basic reference for further courses that deal with deployment and operatation. That said, Keyp it! will be extended with additional features and will see changes in code structure as well.
