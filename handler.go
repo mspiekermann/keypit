@@ -25,7 +25,13 @@ func (app *App) handleSetKeyValuePair(w http.ResponseWriter, r *http.Request) {
 	var request setValueRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		slog.Error("decoding request body: %v", err)
+		slog.ErrorContext(
+			r.Context(),
+			"failed to encode response",
+			slog.Any("error", err),
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
+		)
 		http.Error(w, "invalid JSON request body", http.StatusBadRequest)
 		return
 	}
@@ -74,7 +80,11 @@ func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		slog.Error("encoding response: %v", err)
+		slog.Error(
+			"failed to encode JSON response",
+			"error", err,
+			"status", status,
+		)
 	}
 }
 
