@@ -93,7 +93,7 @@ func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 
 func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
 	started := time.Now()
-	filename := fmt.Sprintf("%s_snapshot.json", time.Now().UTC().Format("20060102T150405.000000000Z"))
+	filename := fmt.Sprintf("./snapshots/%s_snapshot.json", time.Now().UTC().Format("20060102T150405.000000000Z"))
 	file, err := os.Create(filename)
 
 	entries := app.store.GetAll()
@@ -119,5 +119,9 @@ func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
 		"duration", time.Since(started),
 	)
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"file":        filename,
+		"num_entries": itemCount,
+	})
 }
