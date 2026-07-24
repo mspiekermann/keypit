@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -12,13 +13,19 @@ type setValueRequest struct {
 	Value any `json:"value"`
 }
 
+func (app *App) handleHealthcheck(res http.ResponseWriter, req *http.Request) {
+	res.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	res.WriteHeader(200)
+	res.Write([]byte("OK"))
+}
+
 func (app *App) handleSetKeyValuePair(w http.ResponseWriter, r *http.Request) {
 	key := r.PathValue("key")
 
 	var request setValueRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		app.logger.Printf("decoding request body: %v", err)
+		slog.Error("decoding request body: %v", err)
 		http.Error(w, "invalid JSON request body", http.StatusBadRequest)
 		return
 	}
@@ -67,7 +74,7 @@ func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		app.logger.Printf("encoding response: %v", err)
+		slog.Error("encoding response: %v", err)
 	}
 }
 
