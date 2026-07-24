@@ -77,7 +77,6 @@ func (app *App) handleDeleteKeyValuePair(w http.ResponseWriter, r *http.Request)
 
 func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
 
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		slog.Error(
@@ -85,12 +84,20 @@ func (app *App) writeJSON(w http.ResponseWriter, status int, data any) {
 			"error", err,
 			"status", status,
 		)
+
+		status = http.StatusInternalServerError
 	}
+
+	w.WriteHeader(status)
 }
 
 func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
-	filename := fmt.Sprintf("%s_snapshot.json", time.Now().Format("20060102"))
+	started := time.Now()
+	filename := fmt.Sprintf("%s_snapshot.json", time.Now().UTC().Format("20060102T150405.000000000Z"))
 	file, err := os.Create(filename)
+
+	entries := app.store.GetAll()
+	itemCount := app.store.CountItems()
 
 	if err != nil {
 		http.Error(w, "failed to create snapshot", http.StatusInternalServerError)
@@ -102,7 +109,15 @@ func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if err := json.NewEncoder(file).Encode(app.store.GetAll()); err != nil {
+	if err := json.NewEncoder(file).Encode(entries); err != nil {
 		http.Error(w, "failed to write snapshot", http.StatusInternalServerError)
 	}
+
+	slog.Info("snapshot exported",
+		"file", filename,
+		"num_entries", itemCount,
+		"duration", time.Since(started),
+	)
+
+	w.WriteHeader(http.StatusNoContent)
 }
