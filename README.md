@@ -1,5 +1,5 @@
-<span id="logo" align="center"> 
-    <img src="assets/keypit_logo.png" alt="drawing" width="250"/>
+<span id="logo" style="display: block; text-align: center;">
+    <img src="assets/keypit_logo.png" alt="Keypit logo" width="250">
 </span>
 
 
