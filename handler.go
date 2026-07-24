@@ -102,7 +102,7 @@ func (app *App) handleSnapshotToFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if err := json.NewEncoder(file).Encode(app.store.data); err != nil {
+	if err := json.NewEncoder(file).Encode(app.store.GetAll()); err != nil {
 		http.Error(w, "failed to write snapshot", http.StatusInternalServerError)
 	}
 }
