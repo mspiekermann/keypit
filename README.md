@@ -1,6 +1,6 @@
-<span id="logo" style="display: block; text-align: center;">
+<div id="logo" style="text-align: center;">
     <img src="assets/keypit_logo.png" alt="Keypit logo" width="250">
-</span>
+</div>
 
 
 
