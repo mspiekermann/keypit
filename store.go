@@ -1,7 +1,6 @@
 package main
 
 import (
-	"maps"
 	"sync"
 	"time"
 )
@@ -32,8 +31,17 @@ func (s *Store) GetAll() map[string]Item {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	// Use the same timestamp for all expiration checks.
+	now := time.Now()
 	result := make(map[string]Item, len(s.data))
-	maps.Copy(result, s.data)
+
+	for key, item := range s.data {
+		if item.ExpiresAt != nil && now.After(*item.ExpiresAt) {
+			continue
+		}
+
+		result[key] = item
+	}
 
 	return result
 }

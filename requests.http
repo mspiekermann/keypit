@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
   "value": "http://www.example.com",
-  "ttl": "1h"
+  "ttl": "10s"
 }
 
 ###
