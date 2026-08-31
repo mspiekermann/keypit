@@ -85,7 +85,20 @@ func (s *Store) Get(key string) (Item, bool) {
 func (s *Store) CountItems() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return len(s.data)
+
+	// Use the same timestamp for all expiration checks.
+	now := time.Now()
+	result := make(map[string]Item, len(s.data))
+
+	for key, item := range s.data {
+		if item.ExpiresAt != nil && now.After(*item.ExpiresAt) {
+			continue
+		}
+
+		result[key] = item
+	}
+
+	return len(result)
 }
 
 func (s *Store) Delete(key string) bool {
