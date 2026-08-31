@@ -15,6 +15,15 @@ Content-Type: application/json
 }
 
 ###
+PUT http://localhost:9000/items/url
+Content-Type: application/json
+
+{
+  "value": "http://www.example.com",
+  "ttl": "1h"
+}
+
+###
 PUT http://localhost:9000/items/object
 Content-Type: application/json
 

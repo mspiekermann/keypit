@@ -3,36 +3,42 @@ package main
 import (
 	"maps"
 	"sync"
+	"time"
 )
+
+type Item struct {
+	Value     any
+	ExpiresAt *time.Time
+}
 
 type Store struct {
 	mu   sync.RWMutex
-	data map[string]any
+	data map[string]Item
 }
 
 func NewStore() *Store {
 	store := Store{}
-	store.data = make(map[string]any)
+	store.data = make(map[string]Item)
 	return &store
 }
 
-func (s *Store) Add(key string, value any) {
+func (s *Store) Add(key string, value Item) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data[key] = value
 }
 
-func (s *Store) GetAll() map[string]any {
+func (s *Store) GetAll() map[string]Item {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	result := make(map[string]any, len(s.data))
+	result := make(map[string]Item, len(s.data))
 	maps.Copy(result, s.data)
 
 	return result
 }
 
-func (s *Store) Get(key string) (any, bool) {
+func (s *Store) Get(key string) (Item, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	value, exists := s.data[key]

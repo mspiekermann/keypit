@@ -10,7 +10,8 @@ import (
 )
 
 type setValueRequest struct {
-	Value any `json:"value"`
+	Value any    `json:"value"`
+	TTL   string `json:"ttl,omitempty"`
 }
 
 func (app *App) handleHealthcheck(res http.ResponseWriter, req *http.Request) {
@@ -36,7 +37,25 @@ func (app *App) handleSetKeyValuePair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.store.Add(key, request.Value)
+	var expiresAt *time.Time
+
+	if request.TTL != "" {
+		ttl, err := time.ParseDuration(request.TTL)
+		if err != nil {
+			http.Error(w, "invalid TTL", http.StatusBadRequest)
+			return
+		}
+
+		expiration := time.Now().Add(ttl)
+		expiresAt = &expiration
+	}
+
+	item := Item{
+		Value:     request.Value,
+		ExpiresAt: expiresAt,
+	}
+
+	app.store.Add(key, item)
 	w.WriteHeader(http.StatusCreated)
 }
 
