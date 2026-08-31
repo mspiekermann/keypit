@@ -40,9 +40,38 @@ func (s *Store) GetAll() map[string]Item {
 
 func (s *Store) Get(key string) (Item, bool) {
 	s.mu.RLock()
-	defer s.mu.RUnlock()
-	value, exists := s.data[key]
-	return value, exists
+
+	item, exists := s.data[key]
+
+	if !exists {
+		s.mu.RUnlock()
+		return Item{}, false
+	}
+
+	expired := item.ExpiresAt != nil && time.Now().After(*item.ExpiresAt)
+
+	s.mu.RUnlock()
+
+	if !expired {
+		return item, true
+	}
+
+	// Item has expired; acquire write lock to remove it.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Re-check because the item may have changed while acquiring the write lock.
+	item, exists = s.data[key]
+
+	if !exists {
+		return Item{}, false
+	}
+
+	if item.ExpiresAt != nil && time.Now().After(*item.ExpiresAt) {
+		delete(s.data, key)
+	}
+
+	return Item{}, false
 }
 
 func (s *Store) CountItems() int {
